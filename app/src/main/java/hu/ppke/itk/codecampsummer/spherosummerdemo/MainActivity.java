@@ -17,6 +17,7 @@ public class MainActivity extends SpheroActivity {
 	@Override
 	protected void init() {
 		final SeekBar bearingBar = (SeekBar) findViewById(R.id.bearing);
+		final SeekBar speedBar = (SeekBar) findViewById(R.id.speed);
 		bearingBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
 			@Override
@@ -31,9 +32,30 @@ public class MainActivity extends SpheroActivity {
 			public void onProgressChanged(SeekBar seekBar, int progress,
 										  boolean fromUser) {
 				if (mStarted) {
-					sphero.drive(progress, 1);
+					sphero.drive(progress, speedBar.getProgress()/100f);
 				} else {
 					sphero.rotate(progress);
+				}
+			}
+		});
+
+		speedBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+
+			@Override
+			public void onStopTrackingTouch(SeekBar seekBar) {
+			}
+
+			@Override
+			public void onStartTrackingTouch(SeekBar seekBar) {
+			}
+
+			@Override
+			public void onProgressChanged(SeekBar seekBar, int progress,
+										  boolean fromUser) {
+				if (mStarted) {
+					sphero.drive(bearingBar.getProgress(), progress/100f);
+				} else {
+
 				}
 			}
 		});
@@ -84,7 +106,7 @@ public class MainActivity extends SpheroActivity {
 
 			@Override
 			public void onClick(View v) {
-				sphero.drive(bearingBar.getProgress(), 0.4f);
+				sphero.drive(bearingBar.getProgress(), speedBar.getProgress());
 				mStarted = true;
 			}
 		});

@@ -83,11 +83,29 @@
 
         </LinearLayout>
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Irány"/>
+
         <SeekBar
             android:id="@+id/bearing"
             android:max="360"
+            android:paddingBottom="50dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Sebesség"/>
+
+        <SeekBar
+            android:id="@+id/speed"
+            android:max="100"
+            android:progress="40"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
 
     </LinearLayout>
 
