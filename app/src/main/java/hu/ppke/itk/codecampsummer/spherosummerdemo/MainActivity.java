@@ -1,6 +1,8 @@
 package hu.ppke.itk.codecampsummer.spherosummerdemo;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.widget.SeekBar;
 
@@ -53,7 +55,7 @@ public class MainActivity extends SpheroActivity {
 			public void onProgressChanged(SeekBar seekBar, int progress,
 										  boolean fromUser) {
 				if (mStarted) {
-					sphero.drive(bearingBar.getProgress(), progress/100f);
+					sphero.drive(bearingBar.getProgress(), progress / 100f);
 				} else {
 
 				}
@@ -117,6 +119,21 @@ public class MainActivity extends SpheroActivity {
 			public void onClick(View v) {
 				sphero.stop();
 				mStarted = false;
+			}
+		});
+
+		setCollisionListener(sphero, new Runnable() {
+
+			@Override
+			public void run() {
+				sphero.setLed(255, 0, 0);
+				new Handler().postDelayed(new Runnable() {
+					@Override
+					public void run() {
+						sphero.setLed(255, 255, 255);
+					}
+				}, 2000);
+				Log.d("Ütközés", "Puff");
 			}
 		});
 	}
