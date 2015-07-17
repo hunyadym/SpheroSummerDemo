@@ -4,11 +4,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast;
 
 import com.orbotix.Sphero;
+import com.orbotix.async.CollisionDetectedAsyncData;
 import com.orbotix.classic.DiscoveryAgentClassic;
 import com.orbotix.common.DiscoveryAgentEventListener;
 import com.orbotix.common.DiscoveryException;
+import com.orbotix.common.ResponseListener;
 import com.orbotix.common.Robot;
 import com.orbotix.common.RobotChangedStateListener;
+import com.orbotix.common.internal.AsyncMessage;
+import com.orbotix.common.internal.DeviceResponse;
 
 import java.util.List;
 
@@ -60,5 +64,25 @@ public class SpheroActivity extends AppCompatActivity {
 		if (sphero != null) {
 			sphero.disconnect();
 		}
+	}
+
+	protected void setCollisionListener(Sphero sphero, final Runnable runnable) {
+		sphero.enableCollisions(true);
+		sphero.addResponseListener(new ResponseListener() {
+			@Override
+			public void handleResponse(DeviceResponse deviceResponse, Robot robot) {
+			}
+
+			@Override
+			public void handleStringResponse(String s, Robot robot) {
+			}
+
+			@Override
+			public void handleAsyncMessage(AsyncMessage asyncMessage, Robot robot) {
+				if (asyncMessage instanceof CollisionDetectedAsyncData) {
+					runnable.run();
+				}
+			}
+		});
 	}
 }
