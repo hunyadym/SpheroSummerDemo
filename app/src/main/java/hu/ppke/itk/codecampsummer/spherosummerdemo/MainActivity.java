@@ -1,14 +1,22 @@
 package hu.ppke.itk.codecampsummer.spherosummerdemo;
 
+import android.content.Context;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.SeekBar;
+import android.widget.TextView;
 
 public class MainActivity extends SpheroActivity {
 
-	private boolean mStarted;
+	boolean mStarted;
+	SensorManager sensorManager;
+	SensorEventListener gravityListener;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -138,4 +146,34 @@ public class MainActivity extends SpheroActivity {
 		});
 	}
 
+	@Override
+	protected void onResume() {
+		super.onResume();
+		final TextView sensorValues = (TextView) findViewById(R.id.sensor_values);
+		sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+		Sensor sensor = sensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY);
+		gravityListener = new SensorEventListener() {
+			@Override
+			public void onSensorChanged(SensorEvent event) {
+				double length = Math.sqrt(event.values[0]*event.values[0] +
+						event.values[1]*event.values[1] +
+						event.values[2]*event.values[2]);
+				double alfa = Math.asin(event.values[0]/length)*180/Math.PI;
+				double beta = Math.asin(event.values[1]/length)*180/Math.PI;
+				sensorValues.setText(alfa + "\n" + beta);
+			}
+
+			@Override
+			public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+			}
+		};
+		sensorManager.registerListener(gravityListener, sensor, SensorManager.SENSOR_DELAY_GAME);
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		sensorManager.unregisterListener(gravityListener);
+	}
 }
