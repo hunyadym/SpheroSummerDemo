@@ -3,9 +3,12 @@ package hu.ppke.itk.codecampsummer.spherosummerdemo;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast;
 
+import com.orbotix.ConvenienceRobot;
+import com.orbotix.DualStackDiscoveryAgent;
+import com.orbotix.Ollie;
 import com.orbotix.Sphero;
 import com.orbotix.async.CollisionDetectedAsyncData;
-import com.orbotix.classic.DiscoveryAgentClassic;
+import com.orbotix.classic.RobotClassic;
 import com.orbotix.common.DiscoveryAgentEventListener;
 import com.orbotix.common.DiscoveryException;
 import com.orbotix.common.ResponseListener;
@@ -13,18 +16,24 @@ import com.orbotix.common.Robot;
 import com.orbotix.common.RobotChangedStateListener;
 import com.orbotix.common.internal.AsyncMessage;
 import com.orbotix.common.internal.DeviceResponse;
+import com.orbotix.le.RobotLE;
 
 import java.util.List;
 
 public class SpheroActivity extends AppCompatActivity {
 	protected Sphero sphero;
+	protected Ollie ollie;
 
-	protected void init() {}
+	protected void initSphero() {
+	}
+
+	protected void initOllie() {
+	}
 
 	protected void onStart() {
 		super.onStart();
 		try {
-			final DiscoveryAgentClassic discoveryAgent = DiscoveryAgentClassic.getInstance();
+			final DualStackDiscoveryAgent discoveryAgent = DualStackDiscoveryAgent.getInstance();
 			discoveryAgent.addDiscoveryListener(new DiscoveryAgentEventListener() {
 				@Override
 				public void handleRobotsAvailable(List<Robot> list) {
@@ -36,18 +45,27 @@ public class SpheroActivity extends AppCompatActivity {
 			});
 			discoveryAgent.addRobotStateListener(new RobotChangedStateListener() {
 				@Override
-				public void changedState(Robot robot, RobotChangedStateNotificationType robotChangedStateNotificationType) {
+				public void handleRobotChangedState(Robot robot, RobotChangedStateNotificationType robotChangedStateNotificationType) {
 					switch (robotChangedStateNotificationType) {
 						case Online:
-							SpheroActivity.this.sphero = new Sphero(robot);
-							Toast.makeText(SpheroActivity.this, "Kapcsolódva", Toast.LENGTH_SHORT).show();
-							sphero.setBackLedBrightness(0f);
-							sphero.setLed(0, 0, 255);
-							init();
+							if (robot instanceof RobotLE) {
+								SpheroActivity.this.ollie = new Ollie(robot);
+								Toast.makeText(SpheroActivity.this, "Kapcsolódva", Toast.LENGTH_SHORT).show();
+								ollie.setBackLedBrightness(0f);
+								ollie.setLed(0, 0, 255);
+								initOllie();
+							} else if (robot instanceof RobotClassic) {
+								SpheroActivity.this.sphero = new Sphero(robot);
+								Toast.makeText(SpheroActivity.this, "Kapcsolódva", Toast.LENGTH_SHORT).show();
+								sphero.setBackLedBrightness(0f);
+								sphero.setLed(0, 0, 255);
+								initSphero();
+							}
 							break;
 						case Offline:
 							Toast.makeText(SpheroActivity.this, "Lekapcsolódva", Toast.LENGTH_SHORT).show();
 							SpheroActivity.this.sphero = null;
+							SpheroActivity.this.ollie = null;
 							break;
 					}
 				}
@@ -66,9 +84,9 @@ public class SpheroActivity extends AppCompatActivity {
 		}
 	}
 
-	protected void setCollisionListener(Sphero sphero, final Runnable runnable) {
-		sphero.enableCollisions(true);
-		sphero.addResponseListener(new ResponseListener() {
+	protected void setCollisionListener(ConvenienceRobot convenienceRobot, final Runnable runnable) {
+		convenienceRobot.enableCollisions(true);
+		convenienceRobot.addResponseListener(new ResponseListener() {
 			@Override
 			public void handleResponse(DeviceResponse deviceResponse, Robot robot) {
 			}
